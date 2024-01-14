@@ -2,6 +2,95 @@
 #include "logger.h"
 #include "Parser.h"
 #include "EnvironmentVariablesManager.h"
+#include <unistd.h>
+#include <sys/wait.h>
+#include <string>
+#include <vector>
+
+const char Pipe = '|';
+
+bool shouldStop = false; // Global flag to control the loop execution
+
+void ChildWait()
+{
+	while (true)
+	{
+		// Waiting to exit child process
+		int flag;
+		pid_t processid = wait(&flag);
+
+		if (int(processid) <= 0)
+		{
+			// All children exited
+			return;
+		}
+	      	if (WIFSIGNALED(flag))
+		{
+			int flag = WTERMSIG(flag);
+		
+		}
+	}
+}
+
+
+void executeShells(vector<string> Input)
+{
+	//  Non pipe single commands
+	if (int(Input.size()) == 1)
+	{
+		// Single command
+		Shell Input_cmd = Shell(Input.front());
+		Input_cmd.run();
+
+		// Waiting to exit single child process 
+		ChildWait();
+		return;
+	}
+
+	// pipe Commands execution
+
+	// array to track pipes
+	int InputPipe[2];
+	int OutputPipe[2];
+
+	// first command pipe setup
+	if (pipe(OutputPipe) == -1)
+	{
+		Logger::error("Pipe creation failed");
+	};
+
+	// first command with single output pipe
+	Shell FirstCmd = Shell(Input[0], NULL, OutputPipe);
+	FirstCmd.run();
+
+	// Reroute the pipes for the next command
+	InputPipe[0] = OutputPipe[0];
+	InputPipe[1] = OutputPipe[1];
+
+	// use of default STDIN/STDOUT
+	for (size_t i = 1; i < Input.size() - 1; i++)
+	{
+		// pipe setups
+		if (pipe(OutputPipe) == -1)
+		{
+			Logger::error("Pipe creation failed");
+		};
+		// Run the command
+		Shell input = Shell(Input[i], InputPipe, OutputPipe);
+		input.run();
+
+		// Change pipes 
+		InputPipe[0] = OutputPipe[0];
+		InputPipe[1] = OutputPipe[1];
+	}
+
+	// End command
+	Shell EndCmd = Shell(Input[Input.size() - 1], InputPipe, NULL);
+	EndCmd.run();
+
+	// Waiting to complete child after all commands
+	ChildWait();
+}
 
 int main(int argc, char* argv[]){
     
