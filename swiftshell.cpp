@@ -116,7 +116,7 @@ int main(int argc, char* argv[]){
     while(true){
 
         // Display prompt and wait for input
-        std::cout << "SwiftShell$ ";
+        std::cout << "StreamShell$ ";
         std::string rawMultiShell;
 
         // Handle End Of File
@@ -125,10 +125,9 @@ int main(int argc, char* argv[]){
             std::cout<<"\nExiting shell\n";
             break;
         }
-    }
 
-    // Replace environment variables in the user input
-    rawMultiShell = Parser::replaceEnvironmentVariables(rawMultiShell);
+        // Replace environment variables in the user input
+        rawMultiShell = Parser::replaceEnvironmentVariables(rawMultiShell);
 
      if (rawMultiShell.empty())
         {
