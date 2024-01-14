@@ -39,4 +39,36 @@ int main(int argc, char* argv[]){
 
     // Replace environment variables in the user input
     rawMultiShell = Parser::replaceEnvironmentVariables(rawMultiShell);
+
+     if (rawMultiShell.empty())
+        {
+            continue; // Empty input, continue to the next iteration
+        }
+                // Check for the exit Shell
+        if (rawMultiShell == "exit" || rawMultiShell == "quit")
+        {
+            Logger::log("Exiting shell");
+            break; // Exit the loop and close the shell
+        }
+
+         try
+        {
+            // Parse the multi-Shell into a vector of raw Shells (strings)
+            std::vector<std::string> Shells = Parser::lex(rawMultiShell, Pipe);
+            
+            // Execute the parsed Shells
+            executeShells(Shells);
+        }
+        catch (const std::exception &e)
+        {
+            Logger::error("Exception occurred: " + std::string(e.what()));
+        }
+        catch (...)
+        {
+            Logger::error("An unknown error occurred");
+        }
+    }
+     
+    Logger::log("Shell exiting");
+    return 0;
 }
