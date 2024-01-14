@@ -1,4 +1,6 @@
-#include<iostream>
+#include <iostream>
+#include "logger.h"
+#include "Parser.h"
 #include "EnvironmentVariablesManager.h"
 
 int main(int argc, char* argv[]){
@@ -19,4 +21,22 @@ int main(int argc, char* argv[]){
 
     }
 
+    Logger::log("Shell started");
+
+    while(true){
+
+        // Display prompt and wait for input
+        std::cout << "SwiftShell$ ";
+        std::string rawMultiShell;
+
+        // Handle End Of File
+        if(!getline(std::cin, rawMultiShell))
+        {
+            std::cout<<"\nExiting shell\n";
+            break;
+        }
+    }
+
+    // Replace environment variables in the user input
+    rawMultiShell = Parser::replaceEnvironmentVariables(rawMultiShell);
 }

@@ -5,7 +5,7 @@
 #include <fstream>
 #include <ctime>
 
-class logger{
+class Logger{
 
     public:
     static void log(const std::string &message)
